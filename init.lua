@@ -3,8 +3,27 @@ fertiliser.grows = {
 	stdtree = function(pos, def)
 		if farming~=nil and farming.generate_tree~=nil then
 			farming:generate_tree(pos, def[4][1], def[4][2], def[4][3], def[4][4])
-        end
+        	end
 	end,
+	jungletree = function(pos, def)
+--		farming:generate_tree(pos, def[4][1], def[4][2], def[4][3], def[4][4])
+		local nu = minetest.get_node({x=pos.x, y=pos.y-1, z=pos.z}).name
+		local is_soil = minetest.get_item_group(nu, "soil")
+		if is_soil == 0 then
+        		return
+		end
+		
+		print("[fertiliser] spawned "..node.name.." tree")
+		local vm = minetest.get_voxel_manip()
+        	local minp, maxp = vm:read_from_map({x=pos.x-16, y=pos.y, z=pos.z-16}, {x=pos.x+16, y=pos.y+16, z=pos.z+16})
+	 	local a = VoxelArea:new{MinEdge=minp, MaxEdge=maxp}
+        	local data = vm:get_data()
+        	default.grow_jungletree(data, a, pos, math.random(1,100000))
+        	vm:set_data(data)
+        	vm:write_to_map(data)
+        	vm:update_map()
+	end,
+<<<<<<< HEAD
 	jungletree = function(pos, def)
 --		farming:generate_tree(pos, def[4][1], def[4][2], def[4][3], def[4][4])
 		local nu = minetest.get_node({x=pos.x, y=pos.y-1, z=pos.z}).name
@@ -23,6 +42,8 @@ fertiliser.grows = {
         vm:write_to_map(data)
         vm:update_map()
 	end,
+=======
+>>>>>>> origin/master
 	moretrees = function(pos, def)
 		local node = minetest.get_node(pos)
 		print("[fertiliser] spawned "..node.name.." tree")
