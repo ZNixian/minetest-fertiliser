@@ -1,29 +1,11 @@
 fertiliser = {}
+
 fertiliser.grows = {
 	stdtree = function(pos, def)
 		if farming~=nil and farming.generate_tree~=nil then
 			farming:generate_tree(pos, def[4][1], def[4][2], def[4][3], def[4][4])
-        	end
+        end
 	end,
-	jungletree = function(pos, def)
---		farming:generate_tree(pos, def[4][1], def[4][2], def[4][3], def[4][4])
-		local nu = minetest.get_node({x=pos.x, y=pos.y-1, z=pos.z}).name
-		local is_soil = minetest.get_item_group(nu, "soil")
-		if is_soil == 0 then
-        		return
-		end
-		
-		print("[fertiliser] spawned "..node.name.." tree")
-		local vm = minetest.get_voxel_manip()
-        	local minp, maxp = vm:read_from_map({x=pos.x-16, y=pos.y, z=pos.z-16}, {x=pos.x+16, y=pos.y+16, z=pos.z+16})
-	 	local a = VoxelArea:new{MinEdge=minp, MaxEdge=maxp}
-        	local data = vm:get_data()
-        	default.grow_jungletree(data, a, pos, math.random(1,100000))
-        	vm:set_data(data)
-        	vm:write_to_map(data)
-        	vm:update_map()
-	end,
-<<<<<<< HEAD
 	jungletree = function(pos, def)
 --		farming:generate_tree(pos, def[4][1], def[4][2], def[4][3], def[4][4])
 		local nu = minetest.get_node({x=pos.x, y=pos.y-1, z=pos.z}).name
@@ -42,12 +24,10 @@ fertiliser.grows = {
         vm:write_to_map(data)
         vm:update_map()
 	end,
-=======
->>>>>>> origin/master
 	moretrees = function(pos, def)
 		local node = minetest.get_node(pos)
 		print("[fertiliser] spawned "..node.name.." tree")
-		--plantslib.growing[def[1]](pos, node, nil, nil)
+		plantslib.growing[def[1]](pos, node, nil, nil)
 	end,
 	clone = function(pos, def)
 		local node = minetest.get_node(pos)
@@ -75,17 +55,17 @@ fertiliser.saplings = {
 			{},
 		},
 	},
-	{
-		"default:junglesapling",  --  name
-		5,					--  chance
-		fertiliser.grows.jungletree,
-		{
-			"default:tree",
-			"default:leaves",
-			{"default:dirt", "default:dirt_with_grass"},
-			{},
-		},
-	},
+--	{
+--		"default:junglesapling",  --  name
+--		5,					--  chance
+--		fertiliser.grows.jungletree,
+--		{
+--			"default:tree",
+--			"default:leaves",
+--			{"default:dirt", "default:dirt_with_grass"},
+--			{},
+--		},
+--	},
 	{
 		"farming_plus:banana_sapling",
 		5,
@@ -121,16 +101,6 @@ fertiliser.saplings = {
 }
 
 minetest.after(0, function()
-	
-	for name, def in pairs(minetest.registered_nodes) do
-		if def.grow ~= nil then
-			fertiliser.saplings[#fertiliser.saplings + 1] = {
-				name,
-				1,
-				def.grow,
-			}
-		end
-	end
 	
 	local register = function(val)
 		for i = 1, #val.names do
@@ -176,59 +146,6 @@ minetest.after(0, function()
 		full_grown = "farming:cotton_8",
 		names = names
 	})
-	
-	-------------  more trees
-	
-	if minetest.get_modpath("moretrees")~=nil then
---		local tree_table = {
---						{moretrees.spawn_beech_object,},
---						{moretrees.spawn_apple_tree_object,},
---						{moretrees.spawn_oak_object,},
---						{moretrees.spawn_sequoia_object,},
---						{moretrees.spawn_palm_object,},
---						{moretrees.spawn_pine_object,},
---						{moretrees.spawn_rubber_tree_object,},
---						{moretrees.spawn_willow_object,},
---						{moretrees.spawn_birch_object,},
---						{moretrees.spawn_spruce_object,},
---						{moretrees.spawn_jungletree_object,},
---						{moretrees.spawn_fir_object, moretrees.spawn_fir_snow_object},
---					}
---		for i=1, #tree_table do
-		for i=1, #moretrees.treelist do
-			fertiliser.saplings[#fertiliser.saplings + 1] = {
-				"moretrees:"..moretrees.treelist[i][1].."_sapling",
-				moretrees.sapling_interval * moretrees.sapling_chance / 500,
-				function(pos, def)
-					minetest.remove_node(pos)
-					local treename = moretrees.treelist[i][1]
-					local tree_model = treename.."_model"
-					local tree_biome = treename.."_biome"
-					local node_or_function_or_model = moretrees[tree_model]
-					if node_or_function_or_model==nil then
-						node_or_function_or_model = "moretrees:grow_" .. treename
-					end
-					plantslib:replace_object(pos, nil, node_or_function_or_model, nil, nil)
-					
---					if type(node_or_function_or_model) == "table" then
---						plantslib:dbg("Spawn tree at {"..dump(pos).."}")
---						plantslib:generate_tree(pos, node_or_function_or_model)
---					elseif type(node_or_function_or_model) == "string" then
---						if not minetest.registered_nodes[node_or_function_or_model] then
---							plantslib:dbg("Call function: "..node_or_function_or_model.."("..dump_pos(pos)..")")
---							local t2=os.clock()
---							assert(loadstring(node_or_function_or_model.."("..dump_pos(pos)..")"))()
---							plantslib:dbg("Executed that function in ".. (os.clock()-t2)*1000 .."ms")
-----						else
-----							plantslib:dbg("Add node: "..node_or_function_or_model.." at ("..dump(p_top)..")")
-----							minetest.add_node(pos, { name = node_or_function_or_model })
---						end
---					end
-					
-				end,
-			}
-		end
-	end
 end)
 
 minetest.register_craftitem("fertiliser:fertiliser", {
@@ -241,28 +158,12 @@ minetest.register_craftitem("fertiliser:fertiliser", {
 			for i=1, #fertiliser.saplings do
 				local def = fertiliser.saplings[i]
 				if node.name==def[1] then
-					local try = true
-					if user:get_player_control().sneak==true then
-						if itemstack:get_count() < def[2] then
-							return
-						end
-					else
-						if math.random(def[2])~=1 then
-							try = false
-						end
+					print("ok")
+					local res
+					if math.random(def[2])==1 then
+						res = def[3](pos, def)
 					end
-					if try==true then
-						local res = def[3](pos, def)
-					end
-					if res~=false then
-						if user:get_player_control().sneak==true then
-							for i=1, def[2] do
-								itemstack:take_item()
-							end
-						else
-							itemstack:take_item()
-						end
-					end
+					if res~=false then itemstack:take_item() end
 				end
 			end
 		end
@@ -298,3 +199,5 @@ minetest.register_craftitem(":bones:single_bone", {
 	description = "Single Bone",
 	inventory_image = "fertiliser_bone.png",
 })
+
+print("[Fertiliser] Loaded.")

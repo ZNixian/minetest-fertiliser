@@ -2,4 +2,4 @@ default
 
 farming
 farming_plus
-moretrees?
+plants_lib?
