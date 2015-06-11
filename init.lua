@@ -2,7 +2,6 @@ fertiliser = {}
 
 fertiliser.grows = {
 	stdtree = function(pos, def)
-		print(dump(pos))
 		if farming~=nil and farming.generate_tree~=nil then
 			farming.generate_tree(pos, def[4][1], def[4][2], def[4][3], def[4][4])
         end
@@ -52,6 +51,17 @@ fertiliser.saplings = {
 		{
 			"default:tree",
 			"default:leaves",
+			{"default:dirt", "default:dirt_with_grass"},
+			{},
+		},
+	},
+	{
+		"default:pine_sapling",  --  name
+		5,					--  chance
+		fertiliser.grows.stdtree,
+		{
+			"default:pinetree",
+			"default:pine_needles",
 			{"default:dirt", "default:dirt_with_grass"},
 			{},
 		},
@@ -161,6 +171,7 @@ minetest.register_craftitem("fertiliser:fertiliser", {
 				if node.name==def[1] then
 					local res
 					if math.random(def[2])==1 then
+						print("ok")
 						res = def[3](pos, def)
 					end
 					if res~=false then itemstack:take_item() end
