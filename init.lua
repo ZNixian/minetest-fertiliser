@@ -2,8 +2,9 @@ fertiliser = {}
 
 fertiliser.grows = {
 	stdtree = function(pos, def)
+		print(dump(pos))
 		if farming~=nil and farming.generate_tree~=nil then
-			farming:generate_tree(pos, def[4][1], def[4][2], def[4][3], def[4][4])
+			farming.generate_tree(pos, def[4][1], def[4][2], def[4][3], def[4][4])
         end
 	end,
 	jungletree = function(pos, def)
@@ -158,7 +159,6 @@ minetest.register_craftitem("fertiliser:fertiliser", {
 			for i=1, #fertiliser.saplings do
 				local def = fertiliser.saplings[i]
 				if node.name==def[1] then
-					print("ok")
 					local res
 					if math.random(def[2])==1 then
 						res = def[3](pos, def)
@@ -177,6 +177,15 @@ minetest.register_craft({
         {'default:dirt',	'default:dirt',			'default:dirt'},
         {'default:dirt',	'bones:single_bone',	'default:dirt'},
         {'default:dirt',	'default:dirt',			'default:dirt'},
+    },
+})
+
+minetest.register_craft({
+    output = 'fertiliser:fertiliser 5',
+    recipe = {
+        {'',            'group:leaves',                  ''},
+        {'group:leaves',   'default:apple',      'group:leaves'},
+        {'default:dirt',   'default:dirt',         'default:dirt'},
     },
 })
 
