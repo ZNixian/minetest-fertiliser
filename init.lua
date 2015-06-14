@@ -24,10 +24,37 @@ fertiliser.grows = {
         vm:write_to_map(data)
         vm:update_map()
 	end,
-	moretrees = function(pos, def)
-		local node = minetest.get_node(pos)
-		print("[fertiliser] spawned "..node.name.." tree")
-		plantslib.growing[def[1]](pos, node, nil, nil)
+	call_abm = function(pos, def)
+		if def.abm == nil then -- don't look for a abm more than once
+			def.abm = false -- a value, in case we don't find anything
+			local nodename = def[1]
+			
+			for _, abm in ipairs(minetest.registered_abms) do -- check each abm
+				print(dump(abm))
+				if #abm.nodenames == 1 then -- if there is only one node, save time
+					if abm.nodenames[1] == nodename then
+						def.abm = abm.action
+					end
+				elseif type(abm.nodenames) == "string" then -- another way to define a abm
+					if abm.nodenames == nodename then
+						def.abm = abm.action
+					end
+				else -- otherwise, check each node.
+					for _, node in ipairs(abm.nodenames) do
+						if node == nodename then
+							def.abm = i.action
+						end
+					end
+				end
+			end
+		end
+		
+		-- if we have a abm, run it
+		if def.abm ~= false then
+			def.abm(pos, minetest.get_node(pos), 0, 0)
+			return true
+		end
+		return false
 	end,
 	clone = function(pos, def)
 		local node = minetest.get_node(pos)
@@ -66,17 +93,6 @@ fertiliser.saplings = {
 			{},
 		},
 	},
---	{
---		"default:junglesapling",  --  name
---		5,					--  chance
---		fertiliser.grows.jungletree,
---		{
---			"default:tree",
---			"default:leaves",
---			{"default:dirt", "default:dirt_with_grass"},
---			{},
---		},
---	},
 	{
 		"farming_plus:banana_sapling",
 		5,
@@ -112,6 +128,16 @@ fertiliser.saplings = {
 }
 
 minetest.after(0, function()
+	if moretrees ~= nil and moretrees.treelist ~= nil then
+		for tree in ipairs(moretrees.treelist) do
+			local sapling = "moretrees:" .. moretrees.treelist[tree][1] .. "_sapling"
+			fertiliser.saplings[#fertiliser.saplings + 1] = {
+				sapling,
+				1,
+				fertiliser.grows.call_abm,
+			}
+		end
+	end
 	
 	local register = function(val)
 		for i = 1, #val.names do
@@ -171,7 +197,6 @@ minetest.register_craftitem("fertiliser:fertiliser", {
 				if node.name==def[1] then
 					local res
 					if math.random(def[2])==1 then
-						print("ok")
 						res = def[3](pos, def)
 					end
 					if res~=false then itemstack:take_item() end
